@@ -4,6 +4,10 @@ const mongoose = require("mongoose") //import morgan
 const bcrypt = require("bcrypt") // import mercedlogger's log function
 const jwt = require("jsonwebtoken") // import cors
 const {log} = require("mercedlogger")
+const User = require('./models/User')
+const Product = require('./models/Product')
+const checkToken = require("./middleware/checkToken")
+const getUserId = require("./middleware/getUserId")
 
 //DESTRUCTURE ENV VARIABLES WITH DEFAULT VALUES
 const {PORT = 3000} = process.env
@@ -13,7 +17,7 @@ const app = express()
 
 app.use(express.json())
 
-const User = require('./models/User')
+
 
 app.get('/', (req, res) => {
     res.status(200).json('Bem vindo a API')
@@ -26,21 +30,6 @@ app.get('/user/:id', checkToken, async(req, res) => {
     if(!user) return res.status(404).json({msg: 'Usuário não encontrado!'})
     res.status(200).json({ user })
 })
-
-function checkToken(req, res, next){
-    const autoHeader = req.headers['authorization']
-    const token = autoHeader && autoHeader.split(' ')[1]
-    
-    if(!token) return res.status(401).json({msg: "Acesso negado!"})
-
-    try {
-        const secret = process.env.SECRET
-        jwt.verify(token, secret)
-        next()
-    } catch (error) {
-        res.status(400).json({msg: 'Token inválido'})
-    }
-}
 
 app.post('/auth/signup', async(req, res)=>{
     const {name, email, passwd, confirmpasswd} = req.body
@@ -111,4 +100,30 @@ mongoose.connect(`mongodb+srv://${dbUser}:${dbPasswd}@cluster0.adsrmpi.mongodb.n
     app.listen(PORT, () => log.green("SERVER STATUS", `Listening on port ${PORT}`))
 
 ).catch((err) => log.magenta(err))
+
+
+//Product Route
+
+app.post('/create/product', getUserId, async(req, res) => {
+    const {date, description, value } = req.body;
+    if(!date) return res.status(422).json({msg: 'Insira a data da compra'})
+    if(!description) return res.status(422).json({msg: 'A descrição não pode ser vazia'})
+    if(!value) return res.status(422).json({msg: 'Insira o valor da compra'})
+
+    const newProduct = new Product({
+        date,
+        description,
+        value,
+        userId: userId,
+    })
+
+    try {
+        await newProduct.save()
+        res.status(201).json({msg: 'Produto criado com sucesso!'})
+
+    } catch (error) {
+        log.magenta(error)
+        res.status(500).json({msg: 'Erro ao criar objeto, tente novamente'})
+    }
+})
 
