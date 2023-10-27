@@ -132,3 +132,12 @@ app.post('/create/product', getUserId, async (req, res) => {
 
 })
 
+app.get('/products', getUserId, async (req, res) => {
+    try {
+        const products = await Product.find({ userId: userId })
+        res.json(products)
+    } catch (error) {
+        res.status(500).send('Erro ao obter os produtos: ' + error.message);
+    }
+})
+
