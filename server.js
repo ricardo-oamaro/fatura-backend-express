@@ -105,6 +105,8 @@ mongoose.connect(`mongodb+srv://${dbUser}:${dbPasswd}@cluster0.adsrmpi.mongodb.n
 
     ).catch((err) => log.magenta(err))
 
+const db = mongoose.connection;
+
 
 //Product Route
 
@@ -141,3 +143,34 @@ app.get('/products', getUserId, async (req, res) => {
     }
 })
 
+app.put('/product/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const newDate = req.body.date;
+        const newDescription = req.body.description;
+        const newValue = req.body.value
+
+        // Encontra o registro pelo ID e atualiza no banco de dados
+        const produtoAtualizado = await Product.findByIdAndUpdate(id, { date: newDate, description: newDescription, value: newValue }, { new: true });
+
+        res.json(produtoAtualizado);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.delete('/product/:id', async (req, res) => {
+    try {
+      const id = req.params.id;
+  
+      const produtoExcluido = await Product.findByIdAndDelete(id);
+  
+      if (!produtoExcluido) {
+        return res.status(404).json({ message: 'Produto não encontrado.' });
+      }
+  
+      res.json({ message: 'Produto excluído com sucesso.' });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
