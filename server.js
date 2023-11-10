@@ -8,6 +8,7 @@ const User = require('./models/User')
 const Product = require('./models/Product')
 const checkToken = require("./middleware/checkToken")
 const getUserId = require("./middleware/getUserId")
+const cors = require("cors")
 
 //DESTRUCTURE ENV VARIABLES WITH DEFAULT VALUES
 const { PORT = 8000 } = process.env
@@ -18,6 +19,7 @@ const app = express()
 const secret = process.env.SECRET
 
 app.use(express.json())
+app.use(cors());
 
 
 
