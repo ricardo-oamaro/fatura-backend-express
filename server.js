@@ -10,7 +10,7 @@ const checkToken = require("./middleware/checkToken")
 const getUserId = require("./middleware/getUserId")
 
 //DESTRUCTURE ENV VARIABLES WITH DEFAULT VALUES
-const { PORT = 3000 } = process.env
+const { PORT = 8000 } = process.env
 
 // Create Application Object
 const app = express()
@@ -82,7 +82,7 @@ app.post('/auth/login', async (req, res) => {
             id: user.id,
         },
             secret, {
-            expiresIn: '30m'
+            expiresIn: 600
         }
 
         )
