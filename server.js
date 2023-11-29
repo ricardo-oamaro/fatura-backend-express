@@ -30,30 +30,31 @@ app.get('/', (req, res) => {
 //Private Route
 app.get('/user/:id', checkToken, async (req, res) => {
     const id = req.params.id
-    const user = await User.findById(id, '-passwd')
+    const user = await User.findById(id, '-password')
     if (!user) return res.status(404).json({ msg: 'Usuário não encontrado!' })
     res.status(200).json({ user })
 })
 
 app.post('/auth/signup', async (req, res) => {
-    const { name, email, passwd, confirmpasswd } = req.body
+    const { name, email, password, confirmPassword } = req.body
     const userExist = await User.findOne({ email: email })
 
+    if (userExist) return res.status(422).json({ msg: 'E-mail já cadastrado, utilize outro e-mail.' })
     if (!name) return res.status(422).json({ msg: 'O nome é obrigatório' })
     if (!email) return res.status(422).json({ msg: 'O email é obrigatório' })
-    if (!passwd) return res.status(422).json({ msg: 'A senha é obrigatória' })
-    if (passwd !== confirmpasswd) return res.status(422).json({ msg: 'As senhas não correspondem, tente novamente' })
-    if (userExist) return res.status(422).json({ msg: 'Esse email já foi cadastado' })
+    if (!password) return res.status(422).json({ msg: 'A senha é obrigatória' })
+    if (password !== confirmPassword) return res.status(422).json({ msg: 'As senhas não correspondem, tente novamente' })
+    
 
     //Create Password
     const salt = await bcrypt.genSalt(12)
-    const passwdHash = await bcrypt.hash(passwd, salt)
+    const passwdHash = await bcrypt.hash(password, salt)
 
     //Create User
     const user = new User({
         name,
         email,
-        passwd: passwdHash,
+        password: passwdHash,
     })
 
     try {
@@ -84,7 +85,7 @@ app.post('/auth/login', async (req, res) => {
             id: user.id,
         },
             secret, {
-            expiresIn: 600
+            expiresIn: '30s'
         }
 
         )
