@@ -18,6 +18,12 @@ const app = express()
 
 const secret = process.env.SECRET
 
+const generateToken = (id) => {
+    return jwt.sign({ id }, secret, {
+      expiresIn: "5m",
+    });
+  };
+
 app.use(express.json())
 app.use(cors());
 
@@ -39,32 +45,44 @@ app.post('/auth/signup', async (req, res) => {
     const { name, email, password, confirmPassword } = req.body
     const userExist = await User.findOne({ email: email })
 
-    if (userExist) return res.status(422).json({ msg: 'E-mail já cadastrado, utilize outro e-mail.' })
-    if (!name) return res.status(422).json({ msg: 'O nome é obrigatório' })
-    if (!email) return res.status(422).json({ msg: 'O email é obrigatório' })
-    if (!password) return res.status(422).json({ msg: 'A senha é obrigatória' })
-    if (password !== confirmPassword) return res.status(422).json({ msg: 'As senhas não correspondem, tente novamente' })
-    
+    if (userExist) return res.status(422).json({ errors: 'E-mail já cadastrado, utilize outro e-mail.' })
+    if (!name) return res.status(422).json({ errors: 'O nome é obrigatório' })
+    if (!email) return res.status(422).json({ errors: 'O email é obrigatório' })
+    if (!password) return res.status(422).json({ errors: 'A senha é obrigatória' })
+    if (password !== confirmPassword) return res.status(422).json({ errors: 'As senhas não correspondem, tente novamente' })
+
 
     //Create Password
     const salt = await bcrypt.genSalt(12)
     const passwdHash = await bcrypt.hash(password, salt)
 
     //Create User
-    const user = new User({
+    const newUser = await User.create({
         name,
         email,
         password: passwdHash,
     })
 
-    try {
-        await user.save()
-        res.status(201).json({ msg: 'Usuário criado com sucesso!' })
-
-    } catch (error) {
-        log.red(error)
-        res.status(500).json({ msg: 'Erro no servidor, tente novamente mais tarde' })
+    if (!newUser) {
+        res.status(422).json({
+            errors: ["Houve um erro, por favor tente novamente mais tarde."],
+        });
+        return;
     }
+
+    res.status(201).json({ 
+        _id: newUser._id, 
+        token: generateToken(newUser._id)
+    })
+
+    // try {
+    //     await user.save()
+    //     res.status(201).json({ msg: 'Usuário criado com sucesso!' })
+
+    // } catch (error) {
+    //     log.red(error)
+    //     res.status(500).json({ errors: 'Erro no servidor, tente novamente mais tarde' })
+    // }
 
 })
 
@@ -164,16 +182,16 @@ app.put('/product/:id', async (req, res) => {
 
 app.delete('/product/:id', async (req, res) => {
     try {
-      const id = req.params.id;
-  
-      const produtoExcluido = await Product.findByIdAndDelete(id);
-  
-      if (!produtoExcluido) {
-        return res.status(404).json({ message: 'Produto não encontrado.' });
-      }
-  
-      res.json({ message: 'Produto excluído com sucesso.' });
+        const id = req.params.id;
+
+        const produtoExcluido = await Product.findByIdAndDelete(id);
+
+        if (!produtoExcluido) {
+            return res.status(404).json({ message: 'Produto não encontrado.' });
+        }
+
+        res.json({ message: 'Produto excluído com sucesso.' });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
+});
