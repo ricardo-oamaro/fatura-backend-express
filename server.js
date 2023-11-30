@@ -74,16 +74,6 @@ app.post('/auth/signup', async (req, res) => {
         _id: newUser._id, 
         token: generateToken(newUser._id)
     })
-
-    // try {
-    //     await user.save()
-    //     res.status(201).json({ msg: 'Usuário criado com sucesso!' })
-
-    // } catch (error) {
-    //     log.red(error)
-    //     res.status(500).json({ errors: 'Erro no servidor, tente novamente mais tarde' })
-    // }
-
 })
 
 app.post('/auth/login', async (req, res) => {
