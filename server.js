@@ -20,13 +20,12 @@ const secret = process.env.SECRET
 
 const generateToken = (id) => {
     return jwt.sign({ id }, secret, {
-      expiresIn: "5m",
+        expiresIn: "1m",
     });
-  };
+};
 
 app.use(express.json())
 app.use(cors());
-
 
 
 app.get('/', (req, res) => {
@@ -70,41 +69,33 @@ app.post('/auth/signup', async (req, res) => {
         return;
     }
 
-    res.status(201).json({ 
-        _id: newUser._id, 
+    res.status(201).json({
+        _id: newUser._id,
         token: generateToken(newUser._id)
     })
 })
 
 app.post('/auth/login', async (req, res) => {
 
-    const { email, passwd } = req.body
+    const { email, password } = req.body
     const user = await User.findOne({ email: email })
 
-    if (!email) return res.status(422).json({ msg: 'O email é obrigatório' })
-    if (!passwd) return res.status(422).json({ msg: 'A senha é obrigatória' })
-    if (!user) return res.status(404).json({ msg: 'E-mail não encontrado!' })
+    if (!email) return res.status(422).json({ errors: 'O email é obrigatório' })
+    if (!password) return res.status(422).json({ errors: 'A senha é obrigatória' })
+    if (!user) return res.status(404).json({ errors: 'E-mail não encontrado!' })
 
-    const checkPwd = await bcrypt.compare(passwd, user.passwd)
-    if (!checkPwd) return res.status(422).json({ msg: 'Senha Inválida!' })
+    const checkPwd = await bcrypt.compare(password, user.password)
+    if (!checkPwd) return res.status(422).json({ errors: 'Senha Inválida!' })
 
-    try {
-        const token = jwt.sign({
-            id: user.id,
-        },
-            secret, {
-            expiresIn: '30s'
-        }
-
-        )
-        res.status(200).json({ msg: 'Autenticação realizada com sucesso', token })
-
-    } catch (error) {
-        log.magenta(error)
-        res.status(500).json({
-            msg: 'Erro no servidor, tente novamente'
-        })
+    if (!user) {
+        res.status(404).json({ errors: "Usuário não encontrado!" });
+        return;
     }
+
+    res.status(200).json({
+        _id: user._id,
+        token: generateToken(user._id),
+    });
 })
 
 const dbUser = process.env.DB_USER
@@ -112,11 +103,10 @@ const dbPasswd = process.env.DB_PASSWD
 
 mongoose.connect(`mongodb+srv://${dbUser}:${dbPasswd}@cluster0.adsrmpi.mongodb.net/`)
     .then(
+        console.log('conecquitei'),
         app.listen(PORT, () => log.green("SERVER STATUS", `Listening on port ${PORT}`))
 
-    ).catch((err) => log.magenta(err))
-
-const db = mongoose.connection;
+    ).catch((err) => log.magenta('Erro ao conectar ao banco ' + err))
 
 
 //Product Route
