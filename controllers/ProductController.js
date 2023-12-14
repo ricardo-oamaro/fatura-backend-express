@@ -18,6 +18,27 @@ const getProducts = async (req, res) => {
     })
 }
 
+const createProduct = async (req, res) => {
+    const { date, description, value } = req.body;
+
+    const newProduct = new Product({
+        date,
+        description,
+        value,
+        userId: userId,
+    })
+
+    try {
+        await newProduct.save()
+        res.status(201).json({ msg: 'Produto criado com sucesso!' })
+
+    } catch (error) {
+        log.magenta(error)
+        res.status(500).json({ msg: 'Erro ao criar objeto, tente novamente' })
+    }
+}
+
 module.exports = {
-    getProducts
+    getProducts,
+    createProduct
 }
