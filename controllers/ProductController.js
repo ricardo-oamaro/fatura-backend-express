@@ -2,15 +2,15 @@ const Product = require('../models/Product')
 
 const getProducts = async (req, res) => {
     try {
-        console.log('logando o user ' + userId);
         const products = await Product.find({ userId: userId })
+        const soma = products.reduce((acc, product) => acc + product.value, 0);
 
         if (!products){
             res.status(404).json({ errors: ["Nenhum produto encontrado"]})
             return;
             
         }
-        res.status(200).json({products})
+        res.status(200).json({products, soma})
     } catch (error) {
         console.log(error);
     }

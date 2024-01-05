@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const Product = mongoose.model('Product', {
     date: String,
     description: String,
-    value: String,
+    value: Number,
     userId: String
 })
 
