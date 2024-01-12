@@ -71,7 +71,27 @@ const login = async (req, res) => {
   });
 };
 
+const getCurrentUser = async(req, res) => {
+  const { _id } = req.params;
+
+  const user = await User.findOne({ _id })
+
+  console.log(user);
+
+  if (!user) {
+    res.status(404).json({ errors: ["Usurário não encontrado"] });
+    return;
+  }
+
+  res.status(200).json({
+    name: user.name,
+    email: user.email
+  });
+
+}
+
 module.exports = {
   register,
-  login
+  login,
+  getCurrentUser
 };
