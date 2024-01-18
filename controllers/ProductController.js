@@ -1,4 +1,5 @@
 const transactionModel = require('../models/Product')
+const Product = require('../models/Product')
 
 const getTransactions = async (req, res) => {
     try {
@@ -15,6 +16,26 @@ const getTransactions = async (req, res) => {
         console.log(error);
     }
 
+}
+
+const createProduct = async (req, res) => {
+    const { date, description, value } = req.body;
+
+    const newProduct = new Product({
+        date,
+        description,
+        value,
+        userId: userId,
+    })
+
+    try {
+        await newProduct.save()
+        res.status(201).json({ msg: 'Produto criado com sucesso!' })
+
+    } catch (error) {
+        log.magenta(error)
+        res.status(500).json({ msg: 'Erro ao criar objeto, tente novamente' })
+    }
 }
 
 const createTransaction = async (req, res) => {
@@ -70,6 +91,7 @@ const deleteTransaction = async (req, res) => {
 
 module.exports = {
     getTransactions,
+    createProduct,
     createTransaction,
     updateTransaction,
     deleteTransaction

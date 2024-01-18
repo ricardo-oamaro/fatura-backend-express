@@ -18,4 +18,11 @@ const transactionModel = (modelName) => {
     return mongoose.model(modelName, schema);
 };
 
-module.exports = transactionModel
+const Product = mongoose.model('Product', {
+    date: String,
+    description: String,
+    value: Number,
+    userId: String
+})
+
+module.exports = transactionModel, Product
