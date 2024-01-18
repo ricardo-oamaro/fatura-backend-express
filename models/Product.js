@@ -12,6 +12,7 @@ const transactionModel = (modelName) => {
         date: String,
         description: String,
         value: Number,
+        userId: String
     });
 
     return mongoose.model(modelName, schema);
