@@ -1,6 +1,6 @@
-const Product = require('../models/Product')
+const transactionModel = require('../models/Product')
 
-const getProducts = async (req, res) => {
+const getTransactions = async (req, res) => {
     try {
         const products = await Product.find({ userId: userId })
         const soma = products.reduce((acc, product) => acc + product.value, 0);
@@ -17,18 +17,19 @@ const getProducts = async (req, res) => {
 
 }
 
-const createProduct = async (req, res) => {
+const createTransaction = async (req, res) => {
+    const { modelName } = req.params;
     const { date, description, value } = req.body;
 
-    const newProduct = new Product({
-        date,
-        description,
-        value,
-        userId: userId,
-    })
-
     try {
-        await newProduct.save()
+        const Model = transactionModel(modelName);
+        const transaction = new Model({ 
+            date, 
+            description, 
+            value,
+            userId: userId,
+         })
+        await transaction.save();
         res.status(201).json({ msg: 'Produto criado com sucesso!' })
 
     } catch (error) {
@@ -37,7 +38,7 @@ const createProduct = async (req, res) => {
     }
 }
 
-const updateProduct = async (req, res) => {
+const updateTransaction = async (req, res) => {
     const { _id, date, description, value } = req.body
 
     try {
@@ -50,7 +51,7 @@ const updateProduct = async (req, res) => {
     }
 }
 
-const deleteProduct = async (req, res) => {
+const deleteTransaction = async (req, res) => {
     try {
         const id = req.params.id
         console.log('O ID é ' + id);
@@ -68,8 +69,8 @@ const deleteProduct = async (req, res) => {
 }
 
 module.exports = {
-    getProducts,
-    createProduct,
-    updateProduct,
-    deleteProduct
+    getTransactions,
+    createTransaction,
+    updateTransaction,
+    deleteTransaction
 }
