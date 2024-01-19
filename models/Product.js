@@ -25,4 +25,5 @@ const Product = mongoose.model('Product', {
     userId: String
 })
 
-module.exports = transactionModel, Product
+module.exports = transactionModel
+module.exports = Product
