@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
 
-const collectionModel = (modelName) => {
-    if (mongoose.models[modelName]) {
-        return mongoose.model(modelName);
-    }
-    const schema = new mongoose.Schema({})
-    return mongoose.model(modelName, schema);
-};
+const itemSchema = new mongoose.Schema({
+    name: String,
+    // Outras propriedades do item, se necessário
+});
 
-module.exports = collectionModel
+const listSchema = new mongoose.Schema({
+    name: String,
+    items: [itemSchema],
+    userId: String,
+});
+
+const List = mongoose.model('List', listSchema);
+
+module.exports = List;

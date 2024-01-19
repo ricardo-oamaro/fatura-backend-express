@@ -2,8 +2,12 @@ const express = require("express");
 const router = express.Router();
 const getUserId = require("../middleware/getUserId")
 
-const { createCreditCard } = require('../controllers/CreditCardController')
+const { 
+    createList,
+    getListsByUserId
+ } = require('../controllers/CreditCardController')
 
-router.post('/create/:modelName', getUserId, createCreditCard)
+router.post('/lists', getUserId, createList)
+router.get('/get-lists', getUserId, getListsByUserId)
 
 module.exports = router;

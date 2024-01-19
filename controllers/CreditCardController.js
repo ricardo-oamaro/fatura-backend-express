@@ -1,17 +1,26 @@
-const collectionModel = require('../models/CreditCard')
+const List = require('../models/CreditCard')
 
-const createCreditCard = async (req, res) => {
-    const { modelName } = req.params;
+const createList = async (req, res) => {
+    const { name, items } = req.body;
 
     try {
-        const NewCollection = collectionModel(modelName);
-        const collection = new NewCollection();
-        await collection.save();
-        res.status(201).json({ msg: 'Cartão criado com sucesso!' });
+        const newList = await List.create({ name, items, userId: userId });
+        return res.status(201).json(newList);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ msg: 'Erro ao criar cartão, tente novamente' });
+        console.error('Erro ao criar lista:', error);
+        return res.status(500).json({ message: 'Erro ao criar lista, tente novamente.' });
     }
 };
 
-module.exports = { createCreditCard };
+const getListsByUserId = async (req, res) => {
+
+    try {
+        const userLists = await List.find({ userId });
+        return res.status(200).json(userLists);
+    } catch (error) {
+        console.error('Erro ao buscar listas do usuário:', error);
+        return res.status(500).json({ message: 'Erro ao buscar listas do usuário, tente novamente.' });
+    }
+};
+
+module.exports = { createList, getListsByUserId };
